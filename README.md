@@ -1,6 +1,19 @@
 Improved Learning With Technology
 =============
 
+##Project Authors and Contributors
+###Developers
+- Binh
+- Chris
+- Joe
+- Greg
+- Jeff
+- Jacob
+- Taylor
+- James
+
+##Contributors
+
 ##Original Project Details
 Use Kinect2 and the included framework to monitor an individual and their current "state" and determine the effectiveness of their focus and/or studying.
 
