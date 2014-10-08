@@ -41,3 +41,6 @@ http://www.microsoft.com/en-us/kinectforwindows/develop/how-to-videos.aspx
 
 ###Kinect2 Development Forums
 http://social.msdn.microsoft.com/Forums/en-US/home?category=kinectsdks
+
+###Coding4Fun Kinect Page
+http://channel9.msdn.com/coding4fun/kinect
