@@ -1,0 +1,48 @@
+Goal: Go over the assigned items
+
+
+Audience: People with Kinects, Food/entertainment industry, public speakers, institutions.
+Market Analysis: Research or alternatives: James. Interview professors
+Goals: Develop a system to objectively monitor audiences engagement level.
+
+Milestone 1: Dig into Kinect, view video tutorials
+Milestone 2: Create interface
+Milestone 3: Create design
+Milestone 4: Modify facial recognition
+Milestone 5: Get meaningful input from Kinect
+Milestone 6: Prototype
+Milestone 7: Create project proposal/ design document
+Milestone 8: Record and playback useable data
+Milestone 9: Write test
+
+Risk: No one understands SDK
+Risk: Project not feasible
+Risk: Lack of hardware
+Risk: Language used
+Risk: Schedule doesn’t account for unknowns
+
+Development type: Test driven?
+Roles:
+James: Marketing
+Everyone else: Coders
+
+Strength, Weaknesses:
+Stretch goals:
+
+Use Case:
+Institution reviews student engagement numbers to assess teacher performance.
+Instructor uses real time feedback to assess a classes interest in the topic at hand.
+Instructors use the device to modify lectures in a way that engages students.
+Student listens better while hands are busy.
+Student researches lecture while listening.
+Instructor sets up Kinect with software and starts software services. Software monitors room to measure number of students looking at lecturer during the lecture. Engagement metrics are displayed in real time and recorded to be reviewed by instructor after lecture. Instructor views metrics and correlates spikes and lulls with topic or event.
+
+Unknowns:
+Time tables
+individual skills
+ability to work together
+user requirements
+User roles
+
+
+Next steps: Read some SDK, Experiment!, discuss design
