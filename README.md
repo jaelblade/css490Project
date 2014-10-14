@@ -28,6 +28,17 @@ Using the Kinect2 in a classroom environment, use the body and face position fra
 ###Adapted Project Reasoning
 Scale the project usability factor by expanding the original scenario to a classroom. This will make the project more interesting and also involve more students and professors to provide input.
 
+##Visual Studio Configuration
+
+###Git Source Control Provider
+http://gitscc.codeplex.com/wikipage?title=Installation&referringTitle=Documentation
+
+###Git Extensions
+http://sourceforge.net/projects/gitextensions/
+
+###TortoiseGit
+https://code.google.com/p/tortoisegit/wiki/Download
+
 ##Kinect2 Resources
 
 ###Kinect2 Development Frontpage
