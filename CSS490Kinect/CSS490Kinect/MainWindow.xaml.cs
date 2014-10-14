@@ -97,6 +97,7 @@ namespace CSS490Kinect
             // create a face frame source + reader to track each face in the FOV
             this.faceFrameSources = new FaceFrameSource[this.bodyCount];
             this.faceFrameReaders = new FaceFrameReader[this.bodyCount];
+
             for (int i = 0; i < this.bodyCount; i++)
             {
                 // create the face frame source with the required face frame features and an initial tracking Id of 0
