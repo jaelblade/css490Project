@@ -1,4 +1,4 @@
-Improved Learning With Technology
+Project Prism
 =============
 
 ##Project Authors and Contributors
