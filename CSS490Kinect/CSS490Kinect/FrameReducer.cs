@@ -14,6 +14,12 @@ namespace CSS490Kinect
 {
     class FrameReducer: INotifyPropertyChanged
     {
+        private bool needFrame;
+        private TimeSpan lastFrameTime;
+
+        public int BodyFramesProcessed { get; private set; }
+        public int FaceFramesProcessed { get; private set; }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         //Public Data access
@@ -63,8 +69,11 @@ namespace CSS490Kinect
             //constructer code
             InitKinect();
 
+            BodyFramesProcessed = 0;
+            FaceFramesProcessed = 0;
             currentPeople = new List<People>();
             currentBodiesTracked = 0;
+            needFrame = false;
 
             //After Kinect is intiialized, the Face Reader Events need to be monitored
             for (int i = 0; i < bodyCount; i++)
@@ -157,35 +166,40 @@ namespace CSS490Kinect
         //Body frame arrivalevent
         void bodyFR_FrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
-            using (var bodyFrame = e.FrameReference.AcquireFrame())
+            if (needFrame)
             {
-                //Check if frame is valid
-                if (bodyFrame != null)
+                using (var bodyFrame = e.FrameReference.AcquireFrame())
                 {
-                    //Refresh the body array with body data from frame
-                    bodyFrame.GetAndRefreshBodyData(bodies);
-                    int frameBodyCount = 0;
-                    //iterate through each face source
-                    for (int i = 0; i < bodyCount; i++)
+                    //Check if frame is valid
+                    if (bodyFrame != null)
                     {
-                        //Check if body is tracked
-                        if (bodies[i].IsTracked)
+                        BodyFramesProcessed++;
+                        //Refresh the body array with body data from frame
+                        bodyFrame.GetAndRefreshBodyData(bodies);
+                        lastFrameTime = bodyFrame.RelativeTime;
+                        int frameBodyCount = 0;
+                        //iterate through each face source
+                        for (int i = 0; i < bodyCount; i++)
                         {
-                            frameBodyCount++;
-                            //Update face frame source with tracked ID
-                            faceFrameSources[i].TrackingId = bodies[i].TrackingId;
+                            //Check if body is tracked
+                            if (bodies[i].IsTracked)
+                            {
+                                frameBodyCount++;
+                                //Update face frame source with tracked ID
+                                faceFrameSources[i].TrackingId = bodies[i].TrackingId;
+                            }
+                        }
+                        //If the number of bodies tracked changes, then clear the current list of people to refresh information
+                        if (currentBodiesTracked != frameBodyCount)
+                        {
+                            currentPeople.Clear();
+                            currentBodiesTracked = frameBodyCount;
                         }
                     }
-                    //If the number of bodies tracked changes, then clear the current list of people to refresh information
-                    if (currentBodiesTracked != frameBodyCount)
-                    {
-                        currentPeople.Clear();
-                        currentBodiesTracked = frameBodyCount;
-                    }
                 }
+                //Update UI Information
+                UpdateBodyStatus();
             }
-            //Update UI Information
-            UpdateBodyStatus();
         }
 
         //Function to update bound information on the UI
@@ -196,13 +210,16 @@ namespace CSS490Kinect
             int facesTracked = 0;
             for (int i = 0; i < bodyCount; i++)
             {
-                if (bodies[i].IsTracked)
+                if (bodies[i] != null)
                 {
-                    currentBodies++;
-                }
-                if (faceFrameSources[i].IsTrackingIdValid)
-                {
-                    facesTracked++;
+                    if (bodies[i].IsTracked)
+                    {
+                        currentBodies++;
+                    }
+                    if (faceFrameSources[i].IsTrackingIdValid)
+                    {
+                        facesTracked++;
+                    }
                 }
             }
             CurrentBodyCount = currentBodies;
@@ -212,66 +229,98 @@ namespace CSS490Kinect
         //Face Frame Arrival
         private void Reader_FaceFrameArrived(object sender, FaceFrameArrivedEventArgs e)
         {
-            using (var faceFrame = e.FrameReference.AcquireFrame())
+            if (needFrame || FaceFramesProcessed%10 != 0)
             {
-                if (faceFrame != null)
+                using (var faceFrame = e.FrameReference.AcquireFrame())
                 {
-                    //Get the index in the body source to store results in a FaceFrameResult array
-                    int index = GetFaceSourceIndex(faceFrame.FaceFrameSource);
-                    if (faceFrame.IsTrackingIdValid)
+                    if (faceFrame != null)
                     {
-                        //Store FaceFrame into a results array for faster processing
-                        faceFrameResults[index] = faceFrame.FaceFrameResult;
-
-                        //Determine if a trackingID already exists within the list of people
-                        //If the person exists, delete from the list in order to update the current information
-                        int indexOfID = indexOfTrackingID(faceFrameResults[index].TrackingId);
-                        if ( indexOfID > -1)
+                        FaceFramesProcessed++;
+                        //Get the index in the body source to store results in a FaceFrameResult array
+                        int index = GetFaceSourceIndex(faceFrame.FaceFrameSource);
+                        if (faceFrame.IsTrackingIdValid)
                         {
-                            currentPeople.RemoveAt(indexOfID);
-                        }
+                            //Store FaceFrame into a results array for faster processing
+                            faceFrameResults[index] = faceFrame.FaceFrameResult;
 
-                        //Add the new or updated person into the people list
-                        //Get the dictionary of Faceproperties
-                        IReadOnlyDictionary<FaceProperty, DetectionResult> faceProperties = faceFrameResults[index].FaceProperties;
+                            //Determine if a trackingID already exists within the list of people
+                            //If the person exists, delete from the list in order to update the current information
+                            int indexOfID = indexOfTrackingID(faceFrameResults[index].TrackingId);
+                            if (indexOfID > -1)
+                            {
+                                currentPeople.RemoveAt(indexOfID);
+                            }
 
-                        //DetectionResult variables must be declared before querying information with TryGetValue
-                        DetectionResult engaged;
-                        DetectionResult leftEyeClosed;
-                        DetectionResult rightEyeClosed;
-                        //Consolidte information for both eyes
-                        DetectionResult eyesOpen;
+                            //Add the new or updated person into the people list
+                            //Get the dictionary of Faceproperties
+                            IReadOnlyDictionary<FaceProperty, DetectionResult> faceProperties = faceFrameResults[index].FaceProperties;
 
-                        //Query for the specific facial informations
-                        faceProperties.TryGetValue(FaceProperty.Engaged, out engaged);
-                        faceProperties.TryGetValue(FaceProperty.LeftEyeClosed, out leftEyeClosed);
-                        faceProperties.TryGetValue(FaceProperty.RightEyeClosed, out rightEyeClosed);
+                            //DetectionResult variables must be declared before querying information with TryGetValue
+                            DetectionResult engaged;
+                            DetectionResult leftEyeClosed;
+                            DetectionResult rightEyeClosed;
+                            //Consolidte information for both eyes
+                            DetectionResult eyesOpen;
 
-                        //Eyes are open only if both eyes aren't closed.
-                        if (leftEyeClosed == DetectionResult.No && rightEyeClosed == DetectionResult.No)
-                        {
-                            eyesOpen = DetectionResult.Yes;
+                            //Query for the specific facial informations
+                            faceProperties.TryGetValue(FaceProperty.Engaged, out engaged);
+                            faceProperties.TryGetValue(FaceProperty.LeftEyeClosed, out leftEyeClosed);
+                            faceProperties.TryGetValue(FaceProperty.RightEyeClosed, out rightEyeClosed);
+
+                            //Eyes are open only if both eyes aren't closed.
+                            if (leftEyeClosed == DetectionResult.No && rightEyeClosed == DetectionResult.No)
+                            {
+                                eyesOpen = DetectionResult.Yes;
+                            }
+                            else
+                            {
+                                eyesOpen = DetectionResult.No;
+                            }
+
+                            //Add the result into the People class and add to the Current People List
+                            currentPeople.Add(new People(engaged, eyesOpen, faceFrameResults[index].TrackingId));
                         }
                         else
                         {
-                            eyesOpen = DetectionResult.No;
+                            //If there is no valid tracking ID, clear the results for the specific body index
+                            faceFrameResults[index] = null;
                         }
-
-                        //Add the result into the People class and add to the Current People List
-                        currentPeople.Add(new People(engaged, eyesOpen, faceFrameResults[index].TrackingId));
-                    }
-                    else
-                    {
-                        //If there is no valid tracking ID, clear the results for the specific body index
-                        faceFrameResults[index] = null;
                     }
                 }
+            }
+            if (FaceFramesProcessed % 10 == 0)
+            {
+                needFrame = false;
             }
         }
 
         //Return the current list of people
         public List<People> GetPeople()
         {
+            //Set flag for need frame
+            needFrame = true;
+            int retries = 0;
+            //Wait 100 ms for a frame to arrive from Kinect
+            System.Threading.Thread.Sleep(100);
+            //Get the current time
+            TimeSpan currentTime = new TimeSpan();
+            //Check if the last frame is less than a second old
+            while (currentTime.TotalSeconds - lastFrameTime.TotalSeconds > 1.0)
+            {
+                //Wait 50 milliseconds for another frame
+                System.Threading.Thread.Sleep(50);
+                //Get current time to replace
+                currentTime = new TimeSpan();
+                //Increment retry count
+                retries++;
+
+                //Break from loop after 10 retries and return any list of people
+                if (retries >= 10)
+                {
+                    break;
+                }
+            }
+            //Set flag to false to stop processing frames
             return currentPeople;
         }
 

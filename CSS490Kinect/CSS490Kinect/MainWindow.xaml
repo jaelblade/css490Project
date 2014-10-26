@@ -17,6 +17,7 @@
             <!-- Camera Image Grid-->
             <Grid>
                 <TextBlock x:Name="PeopleInfo" FontSize="30" Text="PeopleInfo"/>
+                <Button Content="GetKinectFrame" HorizontalAlignment="Center"  VerticalAlignment="Bottom" Click="Button_Click"/>
             </Grid>
 
             <!-- Depth -->
@@ -40,6 +41,12 @@
                 </StatusBarItem>
                 <StatusBarItem>
                     <TextBlock x:Name="FacesTracked" Text="FacesTracked"/>
+                </StatusBarItem>
+                <StatusBarItem>
+                    <TextBlock x:Name="BodyFramesProcessed" Text="BodyFramesProcessed"/>
+                </StatusBarItem>
+                <StatusBarItem>
+                    <TextBlock x:Name="FaceFramesProcessed" Text="FaceFramesProcessed"/>
                 </StatusBarItem>
                 <StatusBarItem HorizontalAlignment="Right">
                     <TextBlock x:Name="FrameCount" Text="FramesArrived" />
