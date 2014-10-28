@@ -15,16 +15,16 @@ namespace ExpandableClass
 {
     public class PersonTime
     {
-        List<int> timestamps = new List<int>();
-        public int TrackingID {get; set;}
+        List<TimeSpan> timestamps = new List<TimeSpan>();
+        public ulong TrackingID {get; set;}
 
-        public PersonTime(int ID, int time)
+        public PersonTime(ulong ID, TimeSpan time)
         {
             TrackingID = ID;
             timestamps.Add(time); 
         }
 
-        public void addTime(int time)
+        public void addTime(TimeSpan time)
         {
             timestamps.Add(time); 
         }
@@ -35,7 +35,7 @@ namespace ExpandableClass
     {
         List<PersonTime> people = new List<PersonTime>();
 
-        public void addPersonTime(int trackingID, int time)
+        public void addPersonTime(ulong trackingID, TimeSpan time)
         {
             PersonTime newPerson = new PersonTime(trackingID, time);
 
