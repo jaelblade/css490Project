@@ -12,12 +12,17 @@ namespace CSS490Kinect
         public ulong TrackingID { get; private set; }
         public DetectionResult EyesOpen { get; private set; }
         public DetectionResult Engauged { get; private set;}
+        public Vector4 FaceOrientaion { get; private set; }
 
-        public People(DetectionResult engauged, DetectionResult eyesOpen, ulong trackingID)
+        public People(DetectionResult engauged, 
+            DetectionResult eyesOpen, 
+            ulong trackingID, 
+            Vector4 faceOrientation)
         {
             this.Engauged = engauged;
             this.EyesOpen = eyesOpen;
             this.TrackingID = trackingID;
+            this.FaceOrientaion = faceOrientation;
         }
     }
 }

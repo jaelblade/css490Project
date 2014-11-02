@@ -261,11 +261,17 @@ namespace CSS490Kinect
                             DetectionResult rightEyeClosed;
                             //Consolidte information for both eyes
                             DetectionResult eyesOpen;
+                            Vector4 faceOrientation = new Vector4() ; 
 
                             //Query for the specific facial informations
                             faceProperties.TryGetValue(FaceProperty.Engaged, out engaged);
                             faceProperties.TryGetValue(FaceProperty.LeftEyeClosed, out leftEyeClosed);
                             faceProperties.TryGetValue(FaceProperty.RightEyeClosed, out rightEyeClosed);
+                            
+                            if (faceFrameResults[index].FaceRotationQuaternion != null)
+                            {
+                                faceOrientation = faceFrameResults[index].FaceRotationQuaternion;
+                            }
 
                             //Eyes are open only if both eyes aren't closed.
                             if (leftEyeClosed == DetectionResult.No && rightEyeClosed == DetectionResult.No)
@@ -278,7 +284,7 @@ namespace CSS490Kinect
                             }
 
                             //Add the result into the People class and add to the Current People List
-                            currentPeople.Add(new People(engaged, eyesOpen, faceFrameResults[index].TrackingId));
+                            currentPeople.Add(new People(engaged, eyesOpen, faceFrameResults[index].TrackingId, faceOrientation));
                         }
                         else
                         {
@@ -303,14 +309,12 @@ namespace CSS490Kinect
             //Wait 100 ms for a frame to arrive from Kinect
             System.Threading.Thread.Sleep(100);
             //Get the current time
-            TimeSpan currentTime = new TimeSpan();
             //Check if the last frame is less than a second old
-            while (currentTime.TotalSeconds - lastFrameTime.TotalSeconds > 1.0)
+            while (lastFrameTime.TotalSeconds > 1.0)
             {
                 //Wait 50 milliseconds for another frame
                 System.Threading.Thread.Sleep(50);
                 //Get current time to replace
-                currentTime = new TimeSpan();
                 //Increment retry count
                 retries++;
 
