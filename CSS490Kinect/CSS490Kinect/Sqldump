@@ -1,0 +1,84 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data.SqlClient;
+
+namespace sql_connection
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+        }
+    }
+
+
+    public class PersonTime
+    {
+        List<TimeSpan> timestamps = new List<TimeSpan>();
+        public ulong TrackingID {get; set;}
+
+        public PersonTime(ulong ID, TimeSpan time)
+        {
+            TrackingID = ID;
+            timestamps.Add(time); 
+        }
+
+        public void addTime(TimeSpan time)
+        {
+            timestamps.Add(time); 
+        }
+
+    }
+
+    public class ExpandablePersonTimes
+    {
+        List<PersonTime> people = new List<PersonTime>();
+
+        public void addPersonTime(ulong trackingID, TimeSpan time)
+        {
+            PersonTime newPerson = new PersonTime(trackingID, time);
+
+            if (people.BinarySearch(newPerson) < 0) //not in list, add the new person
+            {
+                people.Add(newPerson);
+            }
+            else  //otherwise, found, add the timestamp
+            {
+                people[people.BinarySearch(newPerson)].addTime(time); 
+            }
+
+        }
+
+        List<PersonTime> returnPeople() //accesses a list of people w/ timestamps
+        {
+            return people; 
+        }
+
+    }
+
+
+
+    public class dataDump
+    {
+        public dataDump(List<PersonTime> data)
+        {
+            SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder("this is where it goes");
+
+            SqlConnection con = new SqlConnection(connectionString);
+
+            con.Open();
+
+            int length = data.Count();
+            int depth;
+
+            foreach (PersonTime P in data)
+            {
+                
+            }
+        }
+	      
+	}
+}
