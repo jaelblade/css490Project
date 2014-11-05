@@ -18,17 +18,22 @@ namespace sql_connection
     public class PersonTime
     {
         List<TimeSpan> timestamps = new List<TimeSpan>();
-        public ulong TrackingID {get; set;}
+        public ulong TrackingID { get; set; }
 
         public PersonTime(ulong ID, TimeSpan time)
         {
             TrackingID = ID;
-            timestamps.Add(time); 
+            timestamps.Add(time);
         }
 
         public void addTime(TimeSpan time)
         {
-            timestamps.Add(time); 
+            timestamps.Add(time);
+        }
+
+        public List<TimeSpan> returnTimeStamp()
+        {
+            return timestamps; 
         }
 
     }
@@ -47,14 +52,14 @@ namespace sql_connection
             }
             else  //otherwise, found, add the timestamp
             {
-                people[people.BinarySearch(newPerson)].addTime(time); 
+                people[people.BinarySearch(newPerson)].addTime(time);
             }
 
         }
 
         List<PersonTime> returnPeople() //accesses a list of people w/ timestamps
         {
-            return people; 
+            return people;
         }
 
     }
@@ -76,9 +81,12 @@ namespace sql_connection
 
             foreach (PersonTime P in data)
             {
-                
+                P.returnTimeStamp().Count; 
             }
+
+
+
         }
-	      
-	}
+
+    }
 }
