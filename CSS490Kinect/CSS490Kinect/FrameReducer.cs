@@ -14,6 +14,8 @@ namespace CSS490Kinect
 {
     class FrameReducer: INotifyPropertyChanged
     {
+        public const int BODYCOUNT = 6;
+
         private bool needFrame;
         private TimeSpan lastFrameTime;
 
@@ -33,16 +35,14 @@ namespace CSS490Kinect
         //Kinect Sensor Variable
         private KinectSensor sensor = null;
 
-        //Body Frame Variables
+        //Multisource Frame Reader
+        private MultiSourceFrameReader msFrameReader = null;
 
-        //BodyFrameReder
-        private BodyFrameReader bodyFrameReader = null;
+        //Body Frame Variables
 
         //Array of bodies
         private Body[] bodies = null;
 
-        //Number of tracked bodies
-        private int bodyCount;
 
         private int currentBodiesTracked;
 
@@ -76,7 +76,7 @@ namespace CSS490Kinect
             needFrame = false;
 
             //After Kinect is intiialized, the Face Reader Events need to be monitored
-            for (int i = 0; i < bodyCount; i++)
+            for (int i = 0; i < BODYCOUNT; i++)
             {
                 if (faceFrameReaders[i] != null)
                 {
@@ -84,10 +84,6 @@ namespace CSS490Kinect
                 }
             }
 
-            if (bodyFrameReader != null)
-            {
-                bodyFrameReader.FrameArrived += bodyFR_FrameArrived;
-            }
         }
 
         public void InitKinect()
@@ -105,72 +101,35 @@ namespace CSS490Kinect
             sensor.Open();
 
             //Initialize specific kinect Features
-            InitKinectBody(); //body Information
+            InitKinectMultiFrame();
 
             InitKinectFace(); //Face information
         }
 
-        //Initialize the Body Frame Features
-        private void InitKinectBody()
+        private void InitKinectMultiFrame()
         {
-            //get the body frame reader
-            bodyFrameReader = sensor.BodyFrameSource.OpenReader();
+            msFrameReader = sensor.OpenMultiSourceFrameReader(
+                                        FrameSourceTypes.Color
+                                        | FrameSourceTypes.Depth
+                                        | FrameSourceTypes.Body);
 
-            //Handle for Body Frame Arrival
-            bodyFrameReader.FrameArrived += bodyFR_FrameArrived;
+            msFrameReader.MultiSourceFrameArrived += msFrameReader_MultiSourceFrameArrived;
 
-
-            //Set maximum body count
-            bodyCount = sensor.BodyFrameSource.BodyCount;
-
-            //allocate body array
-            bodies = new Body[bodyCount];
+            //Set Body data
+            bodies = new Body[BODYCOUNT];
 
         }
 
-        //Initialize the Face Frame Features
-        private void InitKinectFace()
-        {
-            //Initialize array for FaceFrames
-            faceFrameSources = new FaceFrameSource[bodyCount];
-            faceFrameReaders = new FaceFrameReader[bodyCount];
-            faceFrameResults = new FaceFrameResult[bodyCount];
-
-            //Link the number of FaceFrame sources to the body count
-            for (int i = 0; i < bodyCount; i++)
-            {
-                faceFrameSources[i] = new FaceFrameSource(sensor, 0, faceFrameFeatures);
-                faceFrameReaders[i] = faceFrameSources[i].OpenReader();
-            }
-
-
-        }
-
-        //Get Body Index of the Face Frame Source
-        private int GetFaceSourceIndex(FaceFrameSource faceFrameSource)
-        {
-            int index = -1;
-
-            for (int i = 0; i < bodyCount; i++)
-            {
-                if (faceFrameSources[i] == faceFrameSource)
-                {
-                    index = i;
-                    break;
-                }
-            }
-
-            return index;
-        }
-
-        //Body frame arrivalevent
-        void bodyFR_FrameArrived(object sender, BodyFrameArrivedEventArgs e)
+        void msFrameReader_MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
         {
             if (needFrame)
             {
-                using (var bodyFrame = e.FrameReference.AcquireFrame())
+                //get the multisource frame so we can gather other frames from it
+                var msFrame = e.FrameReference.AcquireFrame();
+
+                //Check the body frame
+                using (var bodyFrame = msFrame.BodyFrameReference.AcquireFrame())
                 {
-                    //Check if frame is valid
                     if (bodyFrame != null)
                     {
                         BodyFramesProcessed++;
@@ -179,7 +138,7 @@ namespace CSS490Kinect
                         lastFrameTime = bodyFrame.RelativeTime;
                         int frameBodyCount = 0;
                         //iterate through each face source
-                        for (int i = 0; i < bodyCount; i++)
+                        for (int i = 0; i < BODYCOUNT; i++)
                         {
                             //Check if body is tracked
                             if (bodies[i].IsTracked)
@@ -196,11 +155,47 @@ namespace CSS490Kinect
                             currentBodiesTracked = frameBodyCount;
                         }
                     }
+                    UpdateBodyStatus();
                 }
-                //Update UI Information
-                UpdateBodyStatus();
             }
         }
+
+
+        //Initialize the Face Frame Features
+        private void InitKinectFace()
+        {
+            //Initialize array for FaceFrames
+            faceFrameSources = new FaceFrameSource[BODYCOUNT];
+            faceFrameReaders = new FaceFrameReader[BODYCOUNT];
+            faceFrameResults = new FaceFrameResult[BODYCOUNT];
+
+            //Link the number of FaceFrame sources to the body count
+            for (int i = 0; i < BODYCOUNT; i++)
+            {
+                faceFrameSources[i] = new FaceFrameSource(sensor, 0, faceFrameFeatures);
+                faceFrameReaders[i] = faceFrameSources[i].OpenReader();
+            }
+
+
+        }
+
+        //Get Body Index of the Face Frame Source
+        private int GetFaceSourceIndex(FaceFrameSource faceFrameSource)
+        {
+            int index = -1;
+
+            for (int i = 0; i < BODYCOUNT; i++)
+            {
+                if (faceFrameSources[i] == faceFrameSource)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            return index;
+        }
+
 
         //Function to update bound information on the UI
         private void UpdateBodyStatus()
@@ -208,7 +203,7 @@ namespace CSS490Kinect
             //Body and face tracking status can be different, must track both individually
             int currentBodies = 0;
             int facesTracked = 0;
-            for (int i = 0; i < bodyCount; i++)
+            for (int i = 0; i < BODYCOUNT; i++)
             {
                 if (bodies[i] != null)
                 {
@@ -261,7 +256,33 @@ namespace CSS490Kinect
                             DetectionResult rightEyeClosed;
                             //Consolidte information for both eyes
                             DetectionResult eyesOpen;
-                            Vector4 faceOrientation = new Vector4() ; 
+                            Vector4 faceOrientation = new Vector4();
+
+                            //Get the bodies index of the face if it exists
+                            int bodyIndex = -1;
+                            for (int i = 0; i < BODYCOUNT; i++)
+                            {
+                                if (bodies[i].TrackingId == faceFrame.TrackingId)
+                                {
+                                    bodyIndex = i;
+                                    break;
+                                }
+                            }
+
+                            CameraSpacePoint headInCameraSpace = new CameraSpacePoint();
+
+                            if (bodyIndex > 0)
+                            {
+                                Joint headJoint;
+                                bodies[bodyIndex].Joints.TryGetValue(JointType.Head, out headJoint);
+
+                                if (headJoint != null)
+                                {
+                                    headInCameraSpace = headJoint.Position;
+                                }
+                            }
+
+                            
 
                             //Query for the specific facial informations
                             faceProperties.TryGetValue(FaceProperty.Engaged, out engaged);
@@ -284,7 +305,7 @@ namespace CSS490Kinect
                             }
 
                             //Add the result into the People class and add to the Current People List
-                            currentPeople.Add(new People(engaged, eyesOpen, faceFrameResults[index].TrackingId, faceOrientation));
+                            currentPeople.Add(new People(engaged, eyesOpen, faceFrameResults[index].TrackingId, faceOrientation, headInCameraSpace));
                         }
                         else
                         {
@@ -339,6 +360,7 @@ namespace CSS490Kinect
                 if (currentPeople.ElementAt(i).TrackingID == trackingID)
                 {
                     index = i;
+                    break;
                 }
             }
 
