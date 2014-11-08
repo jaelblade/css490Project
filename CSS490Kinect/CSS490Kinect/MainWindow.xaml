@@ -16,13 +16,18 @@
         <Grid Grid.Row="1">
             <!-- Camera Image Grid-->
             <!-- Depth -->
-            <Grid x:Name="ImageGrid" Margin="20" Visibility="Collapsed">
-                <Image x:Name="ColorImage" Source="{Binding ImageSource}" Stretch="UniformToFill" />
+            <Grid x:Name="ImageGrid">
+                <Image x:Name="CameraImage" Stretch="UniformToFill" />
             </Grid>
             
             <Grid>
                 <TextBlock x:Name="PeopleInfo" FontSize="30" Text="PeopleInfo"/>
-                <Button Content="GetKinectFrame" HorizontalAlignment="Center"  VerticalAlignment="Bottom" Click="Button_Click"/>
+                <StackPanel VerticalAlignment="Bottom">
+                    <Button Content="GetKinectFrame" Click="Button_Click"/>
+                    <Button Content="Color Frame" Click="Color_Click"/>
+                    <Button Content="Depth Frame" Click="Depth_Click"/>
+                    <Button Content="IR Frame" Click="IR_Click"/>
+                </StackPanel>
             </Grid>
 
             <!-- Depth -->
