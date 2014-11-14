@@ -55,3 +55,6 @@ C:\Users\v-ctran\Source\Repos\css490Project\CSS490Kinect\CSS490Kinect\obj\Debug\
 C:\Users\v-ctran\Source\Repos\css490Project\CSS490Kinect\CSS490Kinect\obj\Debug\CSS490Kinect.csproj.GenerateResource.Cache
 C:\Users\v-ctran\Source\Repos\css490Project\CSS490Kinect\CSS490Kinect\obj\Debug\CSS490Kinect.exe
 C:\Users\v-ctran\Source\Repos\css490Project\CSS490Kinect\CSS490Kinect\obj\Debug\CSS490Kinect.pdb
+C:\Users\pangamma\Desktop\css490Project\CSS490Kinect\CSS490Kinect\bin\Debug\CSS490Kinect.exe.config
+C:\Users\pangamma\Desktop\css490Project\CSS490Kinect\CSS490Kinect\obj\Debug\CSS490Kinect.exe
+C:\Users\pangamma\Desktop\css490Project\CSS490Kinect\CSS490Kinect\obj\Debug\CSS490Kinect.pdb
