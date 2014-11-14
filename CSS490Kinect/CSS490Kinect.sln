@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSS490Kinect", "CSS490Kinect\CSS490Kinect.csproj", "{1663804F-D03C-4221-A404-F0C0774C2BC8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Master", "UIMaster\Master.csproj", "{4FEBD7D3-C930-4DED-97B9-ECBC9B8B396A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{9C9A6B0E-AAE4-4D6F-8D40-760197B0F100}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,14 @@ Global
 		{1663804F-D03C-4221-A404-F0C0774C2BC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1663804F-D03C-4221-A404-F0C0774C2BC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1663804F-D03C-4221-A404-F0C0774C2BC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FEBD7D3-C930-4DED-97B9-ECBC9B8B396A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FEBD7D3-C930-4DED-97B9-ECBC9B8B396A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FEBD7D3-C930-4DED-97B9-ECBC9B8B396A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FEBD7D3-C930-4DED-97B9-ECBC9B8B396A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C9A6B0E-AAE4-4D6F-8D40-760197B0F100}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C9A6B0E-AAE4-4D6F-8D40-760197B0F100}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C9A6B0E-AAE4-4D6F-8D40-760197B0F100}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C9A6B0E-AAE4-4D6F-8D40-760197B0F100}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

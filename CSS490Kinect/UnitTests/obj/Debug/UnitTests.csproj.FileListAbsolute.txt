@@ -1,0 +1,7 @@
+C:\Users\pangamma\Dropbox\CSS490\UnitTests\bin\Debug\UnitTests.dll
+C:\Users\pangamma\Dropbox\CSS490\UnitTests\bin\Debug\UnitTests.pdb
+C:\Users\pangamma\Dropbox\CSS490\UnitTests\bin\Debug\UIMaster.exe
+C:\Users\pangamma\Dropbox\CSS490\UnitTests\bin\Debug\UIMaster.pdb
+C:\Users\pangamma\Dropbox\CSS490\UnitTests\obj\Debug\UnitTests.csprojResolveAssemblyReference.cache
+C:\Users\pangamma\Dropbox\CSS490\UnitTests\obj\Debug\UnitTests.dll
+C:\Users\pangamma\Dropbox\CSS490\UnitTests\obj\Debug\UnitTests.pdb

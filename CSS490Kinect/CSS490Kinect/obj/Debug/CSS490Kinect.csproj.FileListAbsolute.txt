@@ -58,3 +58,13 @@ C:\Users\v-ctran\Source\Repos\css490Project\CSS490Kinect\CSS490Kinect\obj\Debug\
 C:\Users\pangamma\Desktop\css490Project\CSS490Kinect\CSS490Kinect\bin\Debug\CSS490Kinect.exe.config
 C:\Users\pangamma\Desktop\css490Project\CSS490Kinect\CSS490Kinect\obj\Debug\CSS490Kinect.exe
 C:\Users\pangamma\Desktop\css490Project\CSS490Kinect\CSS490Kinect\obj\Debug\CSS490Kinect.pdb
+C:\Users\pangamma\Dropbox\CSS490\CSS490Kinect\obj\Debug\CSS490Kinect.csprojResolveAssemblyReference.cache
+C:\Users\pangamma\Dropbox\CSS490\CSS490Kinect\obj\Debug\MainWindow.baml
+C:\Users\pangamma\Dropbox\CSS490\CSS490Kinect\obj\Debug\MainWindow.g.cs
+C:\Users\pangamma\Dropbox\CSS490\CSS490Kinect\obj\Debug\App.g.cs
+C:\Users\pangamma\Dropbox\CSS490\CSS490Kinect\obj\Debug\CSS490Kinect_MarkupCompile.cache
+C:\Users\pangamma\Dropbox\CSS490\CSS490Kinect\obj\Debug\CSS490Kinect.g.resources
+C:\Users\pangamma\Dropbox\CSS490\CSS490Kinect\obj\Debug\CSS490Kinect.Properties.Resources.resources
+C:\Users\pangamma\Dropbox\CSS490\CSS490Kinect\obj\Debug\CSS490Kinect.csproj.GenerateResource.Cache
+C:\Users\pangamma\Dropbox\CSS490\CSS490Kinect\obj\Debug\CSS490Kinect.exe
+C:\Users\pangamma\Dropbox\CSS490\CSS490Kinect\obj\Debug\CSS490Kinect.pdb

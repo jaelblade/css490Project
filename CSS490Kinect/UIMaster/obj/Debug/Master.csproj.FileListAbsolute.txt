@@ -1,0 +1,14 @@
+C:\Users\pangamma\Dropbox\CSS490\UIMaster\bin\Debug\UIMaster.exe.config
+C:\Users\pangamma\Dropbox\CSS490\UIMaster\obj\Debug\UIMaster.Properties.Resources.resources
+C:\Users\pangamma\Dropbox\CSS490\UIMaster\obj\Debug\Master.csproj.GenerateResource.Cache
+C:\Users\pangamma\Dropbox\CSS490\UIMaster\bin\Debug\UIMaster.exe
+C:\Users\pangamma\Dropbox\CSS490\UIMaster\bin\Debug\UIMaster.pdb
+C:\Users\pangamma\Dropbox\CSS490\UIMaster\obj\Debug\UIMaster.exe
+C:\Users\pangamma\Dropbox\CSS490\UIMaster\obj\Debug\UIMaster.pdb
+C:\Users\pangamma\Dropbox\CSS490\UIMaster\obj\Debug\UIMaster.UI.Launcher.resources
+C:\Users\pangamma\Dropbox\CSS490\UIMaster\obj\Debug\Master.UI.GraphPanel.resources
+C:\Users\pangamma\Dropbox\CSS490\UIMaster\obj\Debug\Master.csprojResolveAssemblyReference.cache
+C:\Users\pangamma\Dropbox\CSS490\UIMaster\bin\Debug\CSS490Kinect.exe
+C:\Users\pangamma\Dropbox\CSS490\UIMaster\bin\Debug\Microsoft.Kinect.Face.dll
+C:\Users\pangamma\Dropbox\CSS490\UIMaster\bin\Debug\CSS490Kinect.pdb
+C:\Users\pangamma\Dropbox\CSS490\UIMaster\bin\Debug\Microsoft.Kinect.Face.xml
