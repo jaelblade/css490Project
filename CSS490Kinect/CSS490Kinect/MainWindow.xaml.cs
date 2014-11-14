@@ -21,10 +21,12 @@ namespace CSS490Kinect
         public event PropertyChangedEventHandler PropertyChanged;
 
         Mode mode = Mode.Color;
+        Boolean ImageEnabled;
         private int framesCaptured = 0;
         KinectSensor sensor = null;
         FrameReducer frameReducer = null;
         List<People> currentPeople = null;
+        Calculator calc = null;
 
 
         private MultiSourceFrameReader msfr = null;
@@ -44,6 +46,8 @@ namespace CSS490Kinect
 
             //Initialize the FrameReducer
             frameReducer = new FrameReducer();
+            calc = new Calculator();
+            ImageEnabled = false;
             
         }
 
@@ -64,6 +68,15 @@ namespace CSS490Kinect
 
         void msfr_MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
         {
+            if (!ImageEnabled)
+            {
+                CameraImage.Visibility = System.Windows.Visibility.Hidden;
+                return;
+            }
+            else
+            {
+                CameraImage.Visibility = System.Windows.Visibility.Visible;
+            }
             var multiFrame = e.FrameReference.AcquireFrame();
 
             using (var colorFrame = multiFrame.ColorFrameReference.AcquireFrame())
@@ -98,10 +111,9 @@ namespace CSS490Kinect
         //Each person will be line deliminted on the UI
         private void updatePeopleInfo()
         {
-            //Count the total number of frames
-            framesCaptured++;
-            List<People> currentPeople = frameReducer.GetPeople();
 
+            List<People> currentPeople = frameReducer.GetPeople();
+            double score = calc.calculateAttentionScore(currentPeople);
             //Update the Text Information in the UI
             BodiesTracked.Text = "Bodies Tracked: " + frameReducer.CurrentBodyCount;
             FacesTracked.Text = "Faces Tracked: " + frameReducer.CurrentFaceCount;
@@ -111,10 +123,10 @@ namespace CSS490Kinect
             {
                 currentPeopleInfo += "Tracking ID: " + p.TrackingID + " Engaged: " + p.Engauged + " EyesOpen: " + p.EyesOpen + "\n" + "Vector: x:" + p.FaceOrientaion.X + " y:" + p.FaceOrientaion.Y + " z:" + p.FaceOrientaion.Z + " w:" + p.FaceOrientaion.W + "\n";
             }
-            FrameCount.Text = "" + framesCaptured;
             BodyFramesProcessed.Text = "BodyFramesProcessed: " + frameReducer.BodyFramesProcessed;
             FaceFramesProcessed.Text = "FaceFramesProcessed: " + frameReducer.FaceFramesProcessed;
             PeopleInfo.Text = currentPeopleInfo;
+            CalcNum.Text = "Current Score: " + score;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -143,6 +155,11 @@ namespace CSS490Kinect
             Color,
             Depth,
             Infrared
+        }
+
+        private void Toggle_Click(object sender, RoutedEventArgs e)
+        {
+            ImageEnabled = !ImageEnabled;
         }
     }
 }

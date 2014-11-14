@@ -17,13 +17,14 @@
             <!-- Camera Image Grid-->
             <!-- Depth -->
             <Grid x:Name="ImageGrid">
-                <Image x:Name="CameraImage" Stretch="UniformToFill" />
+                <Image x:Name="CameraImage" Stretch="Uniform" />
             </Grid>
             
             <Grid>
                 <TextBlock x:Name="PeopleInfo" FontSize="30" Text="PeopleInfo"/>
                 <StackPanel VerticalAlignment="Bottom">
                     <Button Content="GetKinectFrame" Click="Button_Click"/>
+                    <Button Content="Toggle Image" Click="Toggle_Click"/>
                     <Button Content="Color Frame" Click="Color_Click"/>
                     <Button Content="Depth Frame" Click="Depth_Click"/>
                     <Button Content="IR Frame" Click="IR_Click"/>
@@ -59,7 +60,7 @@
                     <TextBlock x:Name="FaceFramesProcessed" Text="FaceFramesProcessed"/>
                 </StatusBarItem>
                 <StatusBarItem HorizontalAlignment="Right">
-                    <TextBlock x:Name="FrameCount" Text="FramesArrived" />
+                    <TextBlock x:Name="CalcNum" Text="Calculator" />
                 </StatusBarItem>
             </StatusBar>
         </Grid>
