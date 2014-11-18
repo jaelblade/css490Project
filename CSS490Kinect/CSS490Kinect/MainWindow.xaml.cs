@@ -28,6 +28,9 @@ namespace CSS490Kinect
         List<People> currentPeople = null;
         Calculator calc = null;
 
+        private readonly Brush trackedJointBrush = new SolidColorBrush(Color.FromArgb(255, 68, 192, 68));
+        private readonly Brush inferredJointBrush = Brushes.Yellow;
+
 
         private MultiSourceFrameReader msfr = null;
 
@@ -83,7 +86,7 @@ namespace CSS490Kinect
             {
                 if (colorFrame != null && mode == Mode.Color)
                 {
-                    CameraImage.Source = colorFrame.ToBitmap();
+                    CameraImage.Source = drawPeopleVectors(colorFrame.ToBitmap());
                 }
             }
 
@@ -91,7 +94,7 @@ namespace CSS490Kinect
             {
                 if (depthFrame != null && mode == Mode.Depth)
                 {
-                    CameraImage.Source = depthFrame.ToBitmap();
+                    CameraImage.Source = drawPeopleVectors(depthFrame.ToBitmap());
                 }
             }
 
@@ -99,7 +102,7 @@ namespace CSS490Kinect
             {
                 if (irFrame != null && mode == Mode.Infrared)
                 {
-                    CameraImage.Source = irFrame.ToBitmap();
+                    CameraImage.Source = drawPeopleVectors(irFrame.ToBitmap());
                 }
             }
         }
@@ -127,6 +130,22 @@ namespace CSS490Kinect
             FaceFramesProcessed.Text = "FaceFramesProcessed: " + frameReducer.FaceFramesProcessed;
             PeopleInfo.Text = currentPeopleInfo;
             CalcNum.Text = "Current Score: " + score;
+        }
+
+        private ImageSource drawPeopleVectors(ImageSource imageSource)
+        {
+            //Check if there are any people to draw vectors with
+            if (currentPeople != null && currentPeople.Count > 0)
+            {
+                if (mode == Mode.Color)
+                {
+                    foreach (People p in currentPeople) {
+                        ColorSpacePoint colorPoint = coordinateMappter.MapCameraPointToColorSpace(p.HeadJoint);
+                    }
+                }
+            }
+
+            return imageSource;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

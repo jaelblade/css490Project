@@ -60,6 +60,7 @@ namespace CSS490Kinect
         // specify the required face frame results
         FaceFrameFeatures faceFrameFeatures =
            FaceFrameFeatures.RotationOrientation
+            | FaceFrameFeatures.PointsInColorSpace
             | FaceFrameFeatures.FaceEngagement
             | FaceFrameFeatures.LeftEyeClosed
             | FaceFrameFeatures.RightEyeClosed;
