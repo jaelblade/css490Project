@@ -10,6 +10,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using Microsoft.Kinect;
 using Microsoft.Kinect.Face;
+using System.Windows.Controls;
 
 namespace CSS490Kinect
 {
@@ -36,10 +37,7 @@ namespace CSS490Kinect
 
         private CoordinateMapper coordinateMappter = null;
 
-
-        ushort[] irData;
-        byte[] irDataConverted;
-        WriteableBitmap irBitmap;
+        private DrawingGroup drawingGroup = null;
 
         //Main
         public MainWindow()
@@ -51,6 +49,8 @@ namespace CSS490Kinect
             frameReducer = new FrameReducer();
             calc = new Calculator();
             ImageEnabled = false;
+
+            drawingGroup = new DrawingGroup();
             
         }
 
@@ -115,7 +115,7 @@ namespace CSS490Kinect
         private void updatePeopleInfo()
         {
 
-            List<People> currentPeople = frameReducer.GetPeople();
+            currentPeople = frameReducer.GetPeople();
             double score = calc.calculateAttentionScore(currentPeople);
             //Update the Text Information in the UI
             BodiesTracked.Text = "Bodies Tracked: " + frameReducer.CurrentBodyCount;
@@ -124,7 +124,9 @@ namespace CSS490Kinect
             
             foreach (People p in currentPeople)
             {
-                currentPeopleInfo += "Tracking ID: " + p.TrackingID + " Engaged: " + p.Engauged + " EyesOpen: " + p.EyesOpen + "\n" + "Vector: x:" + p.FaceOrientaion.X + " y:" + p.FaceOrientaion.Y + " z:" + p.FaceOrientaion.Z + " w:" + p.FaceOrientaion.W + "\n";
+                currentPeopleInfo += "Tracking ID: " + p.TrackingID + " Engaged: " + p.Engauged + " EyesOpen: " + p.EyesOpen + "\n" + 
+                                        "Vector: x:" + p.FaceOrientaion.X + " y:" + p.FaceOrientaion.Y + " z:" + p.FaceOrientaion.Z + " w:" + p.FaceOrientaion.W + "\n" +
+                                        "Head Joint X: " + p.HeadJoint.X + " Y: " + p.HeadJoint.Y + " Z: " + p.HeadJoint.Z + "\n";
             }
             BodyFramesProcessed.Text = "BodyFramesProcessed: " + frameReducer.BodyFramesProcessed;
             FaceFramesProcessed.Text = "FaceFramesProcessed: " + frameReducer.FaceFramesProcessed;
@@ -135,14 +137,51 @@ namespace CSS490Kinect
         private ImageSource drawPeopleVectors(ImageSource imageSource)
         {
             //Check if there are any people to draw vectors with
-            if (currentPeople != null && currentPeople.Count > 0)
+            if(currentPeople != null && currentPeople.Count > 0)
             {
-                if (mode == Mode.Color)
+                using (DrawingContext dc = drawingGroup.Open())
                 {
-                    foreach (People p in currentPeople) {
-                        ColorSpacePoint colorPoint = coordinateMappter.MapCameraPointToColorSpace(p.HeadJoint);
+                    
+                    Brush brush = Brushes.Orange;
+                    Pen pen = new Pen(brush, 2.0);
+                    //Need to map to color space points
+                    if (mode == Mode.Color)
+                    {
+                        //Draw the image before drawing points and lines
+                        dc.DrawImage(imageSource, new Rect(0.0, 0.0, sensor.ColorFrameSource.FrameDescription.Width, sensor.ColorFrameSource.FrameDescription.Height));
+                        foreach (People p in currentPeople)
+                        {
+                            //Get the point in color space
+                            ColorSpacePoint colorPoint = coordinateMappter.MapCameraPointToColorSpace(p.HeadJoint);
+                            Point headPoint = new Point(colorPoint.X, colorPoint.Y);
+                            dc.DrawEllipse(brush, pen, headPoint, 10.0, 10.0);
+
+                            //Calculate Vector End Points
+                            CameraSpacePoint vectorEnd = p.HeadJoint;
+                            vectorEnd.X -= p.FaceOrientaion.X / p.FaceOrientaion.W;
+                            vectorEnd.Y += p.FaceOrientaion.Y / p.FaceOrientaion.W;
+                            vectorEnd.Z += p.FaceOrientaion.Z / p.FaceOrientaion.W;
+
+                            ColorSpacePoint colorPointEnd = coordinateMappter.MapCameraPointToColorSpace(vectorEnd);
+                            Point vector = new Point(colorPointEnd.X, colorPointEnd.Y);
+
+                            dc.DrawLine(pen, headPoint, vector);
+                        }
+
+                    }
+
+                    //The depth and infrared use the depth space point
+                    if (mode == Mode.Depth || mode == Mode.Infrared)
+                    {
+                        foreach (People p in currentPeople)
+                        {
+                            DepthSpacePoint depthPoint = coordinateMappter.MapCameraPointToDepthSpace(p.HeadJoint);
+                        }
                     }
                 }
+
+                DrawingImage drawingImage = new DrawingImage(drawingGroup);
+                return drawingImage;
             }
 
             return imageSource;
