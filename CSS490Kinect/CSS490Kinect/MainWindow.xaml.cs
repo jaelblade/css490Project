@@ -28,6 +28,7 @@ namespace CSS490Kinect
         FrameReducer frameReducer = null;
         List<People> currentPeople = null;
         Calculator calc = null;
+        Body[] bodies = null;
 
         private readonly Brush trackedJointBrush = new SolidColorBrush(Color.FromArgb(255, 68, 192, 68));
         private readonly Brush inferredJointBrush = Brushes.Yellow;
@@ -39,23 +40,39 @@ namespace CSS490Kinect
 
         private DrawingGroup drawingGroup = null;
 
+        //FaceFrame Variables
+
+        //Face Sources
+        private FaceFrameSource[] faceFrameSources = null;
+
+        //Face Reader
+        private FaceFrameReader[] faceFrameReaders = null;
+
+        //Face Results
+        private FaceFrameResult[] faceFrameResults = null;
+
+        private int BODYCOUNT = 6;
+
+        FaceFrameFeatures faceFrameFeatures =
+           FaceFrameFeatures.RotationOrientation;
+
         //Main
         public MainWindow()
         {
             InitializeComponent();
-            this.Loaded += MainWindow_Loaded;
 
             //Initialize the FrameReducer
             frameReducer = new FrameReducer();
             calc = new Calculator();
-            ImageEnabled = false;
+            ImageEnabled = true;
 
             drawingGroup = new DrawingGroup();
-            
-        }
+            bodies = new Body[BODYCOUNT];
 
-        void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
+            faceFrameSources = new FaceFrameSource[BODYCOUNT];
+            faceFrameReaders = new FaceFrameReader[BODYCOUNT];
+            faceFrameResults = new FaceFrameResult[BODYCOUNT];
+
             sensor = KinectSensor.GetDefault();
             if (sensor != null)
             {
@@ -63,11 +80,30 @@ namespace CSS490Kinect
             }
             msfr = sensor.OpenMultiSourceFrameReader(FrameSourceTypes.Color
                                                      | FrameSourceTypes.Depth
-                                                     | FrameSourceTypes.Infrared);
+                                                     | FrameSourceTypes.Infrared
+                                                     | FrameSourceTypes.Body
+                                                     );
             coordinateMappter = sensor.CoordinateMapper;
+
+            //Link the number of FaceFrame sources to the body count
+            for (int i = 0; i < BODYCOUNT; i++)
+            {
+                faceFrameSources[i] = new FaceFrameSource(sensor, 0, faceFrameFeatures);
+                faceFrameReaders[i] = faceFrameSources[i].OpenReader();
+            }
+
+            //After Kinect is intiialized, the Face Reader Events need to be monitored
+            for (int i = 0; i < BODYCOUNT; i++)
+            {
+                if (faceFrameReaders[i] != null)
+                {
+                    faceFrameReaders[i].FrameArrived += Reader_FaceFrameArrived;
+                }
+            }
 
             msfr.MultiSourceFrameArrived += msfr_MultiSourceFrameArrived;
         }
+
 
         void msfr_MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
         {
@@ -81,6 +117,23 @@ namespace CSS490Kinect
                 CameraImage.Visibility = System.Windows.Visibility.Visible;
             }
             var multiFrame = e.FrameReference.AcquireFrame();
+
+            using (var bodyFrame = multiFrame.BodyFrameReference.AcquireFrame())
+            {
+                if (bodyFrame != null)
+                {
+                    bodyFrame.GetAndRefreshBodyData(bodies);
+                    for (int i = 0; i < BODYCOUNT; i++)
+                    {
+                        //Check if body is tracked
+                        if (bodies[i].IsTracked)
+                        {
+                            //Update face frame source with tracked ID
+                            faceFrameSources[i].TrackingId = bodies[i].TrackingId;
+                        }
+                    }
+                }
+            }
 
             using (var colorFrame = multiFrame.ColorFrameReference.AcquireFrame())
             {
@@ -107,7 +160,21 @@ namespace CSS490Kinect
             }
         }
 
-        
+        private void Reader_FaceFrameArrived(object sender, FaceFrameArrivedEventArgs e)
+        {
+            using (var faceFrame = e.FrameReference.AcquireFrame())
+            {
+                if (faceFrame != null)
+                {
+                    int index = GetFaceSourceIndex(faceFrame.FaceFrameSource);
+                    if (faceFrame.IsTrackingIdValid)
+                    {
+                        //Store FaceFrame into a results array for faster processing
+                        faceFrameResults[index] = faceFrame.FaceFrameResult;
+                    }
+                }
+            }
+        }
 
 
         //Turn the list of people into string information
@@ -137,7 +204,7 @@ namespace CSS490Kinect
         private ImageSource drawPeopleVectors(ImageSource imageSource)
         {
             //Check if there are any people to draw vectors with
-            if(currentPeople != null && currentPeople.Count > 0)
+            if(bodies != null)
             {
                 using (DrawingContext dc = drawingGroup.Open())
                 {
@@ -149,23 +216,48 @@ namespace CSS490Kinect
                     {
                         //Draw the image before drawing points and lines
                         dc.DrawImage(imageSource, new Rect(0.0, 0.0, sensor.ColorFrameSource.FrameDescription.Width, sensor.ColorFrameSource.FrameDescription.Height));
-                        foreach (People p in currentPeople)
+                        foreach (Body body in bodies)
                         {
-                            //Get the point in color space
-                            ColorSpacePoint colorPoint = coordinateMappter.MapCameraPointToColorSpace(p.HeadJoint);
-                            Point headPoint = new Point(colorPoint.X, colorPoint.Y);
-                            dc.DrawEllipse(brush, pen, headPoint, 10.0, 10.0);
+                            if (body != null && body.IsTracked)
+                            {
+                                Joint headJoint;
+                                if (!body.Joints.TryGetValue(JointType.Head, out headJoint))
+                                {
+                                    continue;
+                                }
+                                //Get the point in color space
+                                ColorSpacePoint colorPoint = coordinateMappter.MapCameraPointToColorSpace(headJoint.Position);
+                                Point headPoint = new Point(colorPoint.X, colorPoint.Y);
+                                dc.DrawEllipse(brush, pen, headPoint, 10.0, 10.0);
+                                
+                                FaceFrameResult faceResult = null;
 
-                            //Calculate Vector End Points
-                            CameraSpacePoint vectorEnd = p.HeadJoint;
-                            vectorEnd.X -= p.FaceOrientaion.X / p.FaceOrientaion.W;
-                            vectorEnd.Y += p.FaceOrientaion.Y / p.FaceOrientaion.W;
-                            vectorEnd.Z += p.FaceOrientaion.Z / p.FaceOrientaion.W;
+                                for (int i = 0; i < BODYCOUNT; i++)
+                                {
+                                    if (faceFrameResults[i] != null && body.TrackingId == faceFrameResults[i].TrackingId)
+                                    {
+                                        faceResult = faceFrameResults[i];
+                                        break;
+                                    }
+                                }
 
-                            ColorSpacePoint colorPointEnd = coordinateMappter.MapCameraPointToColorSpace(vectorEnd);
-                            Point vector = new Point(colorPointEnd.X, colorPointEnd.Y);
+                                if (faceResult != null)
+                                {
 
-                            dc.DrawLine(pen, headPoint, vector);
+                                    Vector4 faceRotation = faceResult.FaceRotationQuaternion;
+                                    //Calculate Vector End Points
+                                    CameraSpacePoint vectorEnd = headJoint.Position;
+
+                                    vectorEnd.X -= faceRotation.Y / faceRotation.W;
+                                    vectorEnd.Y += faceRotation.X / faceRotation.W;
+                                    //vectorEnd.Z += faceRotation.Z;
+
+                                    ColorSpacePoint colorPointEnd = coordinateMappter.MapCameraPointToColorSpace(vectorEnd);
+                                    Point vector = new Point(colorPointEnd.X, colorPointEnd.Y);
+
+                                    dc.DrawLine(pen, headPoint, vector);
+                                }
+                            }
                         }
 
                     }
@@ -218,6 +310,23 @@ namespace CSS490Kinect
         private void Toggle_Click(object sender, RoutedEventArgs e)
         {
             ImageEnabled = !ImageEnabled;
+        }
+
+                //Get Body Index of the Face Frame Source
+        private int GetFaceSourceIndex(FaceFrameSource faceFrameSource)
+        {
+            int index = -1;
+
+            for (int i = 0; i < BODYCOUNT; i++)
+            {
+                if (faceFrameSources[i] == faceFrameSource)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            return index;
         }
     }
 }
