@@ -265,9 +265,49 @@ namespace CSS490Kinect
                     //The depth and infrared use the depth space point
                     if (mode == Mode.Depth || mode == Mode.Infrared)
                     {
-                        foreach (People p in currentPeople)
+                        dc.DrawImage(imageSource, new Rect(0.0, 0.0, sensor.DepthFrameSource.FrameDescription.Width, sensor.DepthFrameSource.FrameDescription.Height));
+                        foreach (Body body in bodies)
                         {
-                            DepthSpacePoint depthPoint = coordinateMappter.MapCameraPointToDepthSpace(p.HeadJoint);
+                            if (body != null && body.IsTracked)
+                            {
+                                Joint headJoint;
+                                if (!body.Joints.TryGetValue(JointType.Head, out headJoint))
+                                {
+                                    continue;
+                                }
+
+                                DepthSpacePoint dethPoint = coordinateMappter.MapCameraPointToDepthSpace(headJoint.Position);
+                                Point headPoint = new Point(dethPoint.X, dethPoint.Y);
+                                dc.DrawEllipse(brush, pen, headPoint, 10.0, 10.0);
+
+                                FaceFrameResult faceResult = null;
+
+                                for (int i = 0; i < BODYCOUNT; i++)
+                                {
+                                    if (faceFrameResults[i] != null && body.TrackingId == faceFrameResults[i].TrackingId)
+                                    {
+                                        faceResult = faceFrameResults[i];
+                                        break;
+                                    }
+                                }
+
+                                if (faceResult != null)
+                                {
+
+                                    Vector4 faceRotation = faceResult.FaceRotationQuaternion;
+                                    //Calculate Vector End Points
+                                    CameraSpacePoint vectorEnd = headJoint.Position;
+
+                                    vectorEnd.X -= faceRotation.Y / faceRotation.W;
+                                    vectorEnd.Y += faceRotation.X / faceRotation.W;
+                                    //vectorEnd.Z += faceRotation.Z;
+
+                                    DepthSpacePoint depthPointEnd = coordinateMappter.MapCameraPointToDepthSpace(vectorEnd);
+                                    Point vector = new Point(depthPointEnd.X, depthPointEnd.Y);
+
+                                    dc.DrawLine(pen, headPoint, vector);
+                                }
+                            }
                         }
                     }
                 }
