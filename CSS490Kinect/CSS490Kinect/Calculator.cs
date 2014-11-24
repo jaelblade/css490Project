@@ -16,10 +16,14 @@ namespace CSS490Kinect
     class Calculator
     {
         public double attentionScore { get; private set; }
+        KinectSensor sensor = null;
+        CoordinateMapper coordinateMapper = null;
 
         public Calculator()
         {
             attentionScore = 50;
+            sensor = KinectSensor.GetDefault();
+            coordinateMapper = sensor.CoordinateMapper;
         }
 
         public double calculateAttentionScore(List<People> currentPeople)
@@ -50,6 +54,112 @@ namespace CSS490Kinect
             attentionScore = attentionScore * 0.8 + attentionScoreThisFrame * 0.2;
 
             return attentionScore;
+        }
+
+        //Calculate if the gaze directions converge
+        
+        private bool gazeConverges(List<People> currentPeople)
+        {
+            //If there are no people, there is no gaze and therefore false
+            if (currentPeople.Count <= 0)
+            {
+                return false;
+            }
+
+            //If only one person, then gaze will always converge
+            if (currentPeople.Count == 1)
+            {
+                return true;
+            }
+
+            //Create array of color points to convery the camera points into
+            DepthSpacePoint[] currentDepthPoints = new DepthSpacePoint[currentPeople.Count];
+            DepthSpacePoint[] vectoredDepthPoints = new DepthSpacePoint[currentPeople.Count];
+            //convert all camera space points to Depth Space points
+            for (int i = 0; i < currentPeople.Count; i++)
+            {
+                CameraSpacePoint vectoredPoint = currentPeople[i].HeadJoint;
+                vectoredPoint.X -= currentPeople[i].FaceOrientaion.Y / currentPeople[i].FaceOrientaion.W;
+                vectoredPoint.Y -= currentPeople[i].FaceOrientaion.X / currentPeople[i].FaceOrientaion.W;
+                currentDepthPoints[i] = coordinateMapper.MapCameraPointToDepthSpace(currentPeople[i].HeadJoint);
+                vectoredDepthPoints[i] = coordinateMapper.MapCameraPointToDepthSpace(vectoredPoint);
+            }
+
+            //calculate midpoint of all points
+            //Take all points and calculate the lowest and highest X/Y values and find the midpoint
+            float depthHighX = float.MinValue; //Start high values at min value for comparisons
+            float depthLowX = float.MaxValue; //Start low values at the highest value for comparisons
+            float depthHighY = float.MinValue;
+            float depthLowY = float.MaxValue;
+
+            foreach (DepthSpacePoint dsp in currentDepthPoints)
+            {
+                //If the current X is lower than the known lowest X, current X is the new lowest X
+                if (dsp.X < depthLowX)
+                {
+                    depthLowX = dsp.X;
+                }
+                //If the current X is higher than the known highest X, current X is the new highest X
+                if (dsp.X > depthHighX)
+                {
+                    depthHighX = dsp.X;
+                }
+                //If the current Y is lower than the known lowest Y, current Y is the new lowest Y
+                if (dsp.Y < depthLowY)
+                {
+                    depthLowY = dsp.Y;
+                }
+                //If the current Y is higher than the known highest Y, current Y is the new highest Y
+                if (dsp.Y > depthHighY)
+                {
+                    depthHighY = dsp.Y;
+                }
+            }
+
+            //Mid point is the addition of the high and low values divided by 2.0f due to float numbers
+            //Get current midpoint
+            DepthSpacePoint currentMidPoint = new DepthSpacePoint();
+            currentMidPoint.X = (depthHighX + depthLowX) / 2.0f;
+            currentMidPoint.Y = (depthHighY + depthLowY) / 2.0f;
+
+            //Reset High and Low variables back to min amd max values
+            depthHighX = float.MinValue; //Start high values at min value for comparisons
+            depthLowX = float.MaxValue; //Start low values at the highest value for comparisons
+            depthHighY = float.MinValue;
+            depthLowY = float.MaxValue;
+
+            foreach (DepthSpacePoint dsp in vectoredDepthPoints)
+            {
+                //If the current X is lower than the known lowest X, current X is the new lowest X
+                if (dsp.X < depthLowX)
+                {
+                    depthLowX = dsp.X;
+                }
+                //If the current X is higher than the known highest X, current X is the new highest X
+                if (dsp.X > depthHighX)
+                {
+                    depthHighX = dsp.X;
+                }
+                //If the current Y is lower than the known lowest Y, current Y is the new lowest Y
+                if (dsp.Y < depthLowY)
+                {
+                    depthLowY = dsp.Y;
+                }
+                //If the current Y is higher than the known highest Y, current Y is the new highest Y
+                if (dsp.Y > depthHighY)
+                {
+                    depthHighY = dsp.Y;
+                }
+            }
+
+            DepthSpacePoint vectoredMidPoint = new DepthSpacePoint();
+            vectoredMidPoint.X = (depthHighX + depthLowX) / 2.0f;
+            vectoredMidPoint.Y = (depthHighY + depthLowY) / 2.0f;
+
+            //Get average of distances of the currentpoints
+
+
+            return true;
         }
     }
 }

@@ -272,7 +272,7 @@ namespace CSS490Kinect
 
                             CameraSpacePoint headInCameraSpace = new CameraSpacePoint();
 
-                            if (bodyIndex > 0)
+                            if (bodyIndex >= 0)
                             {
                                 Joint headJoint;
                                 bodies[bodyIndex].Joints.TryGetValue(JointType.Head, out headJoint);

@@ -73,3 +73,4 @@ C:\Users\Christopher\Source\css490Project\CSS490Kinect\CSS490Kinect\obj\Debug\CS
 C:\Users\Christopher\Source\css490Project\CSS490Kinect\CSS490Kinect\obj\Debug\CSS490Kinect.csproj.GenerateResource.Cache
 C:\Users\Christopher\Source\css490Project\CSS490Kinect\CSS490Kinect\obj\Debug\CSS490Kinect.exe
 C:\Users\Christopher\Source\css490Project\CSS490Kinect\CSS490Kinect\obj\Debug\CSS490Kinect.pdb
+C:\Users\Christopher\Source\css490Project\CSS490Kinect\CSS490Kinect\obj\Debug\CSS490Kinect.csprojResolveAssemblyReference.cache
