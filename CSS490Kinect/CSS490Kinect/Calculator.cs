@@ -94,6 +94,11 @@ namespace CSS490Kinect
 
             foreach (DepthSpacePoint dsp in currentDepthPoints)
             {
+                //Skip checking if both points are 0.0 meaning they didn't get tracked
+                if (dsp.X == 0.0f && dsp.Y == 0.0f)
+                {
+                    continue;
+                }
                 //If the current X is lower than the known lowest X, current X is the new lowest X
                 if (dsp.X < depthLowX)
                 {
@@ -130,6 +135,11 @@ namespace CSS490Kinect
 
             foreach (DepthSpacePoint dsp in vectoredDepthPoints)
             {
+                //Skip checking if both points are 0.0 meaning they didn't get tracked
+                if (dsp.X == 0.0f && dsp.Y == 0.0f)
+                {
+                    continue;
+                }
                 //If the current X is lower than the known lowest X, current X is the new lowest X
                 if (dsp.X < depthLowX)
                 {
@@ -157,9 +167,36 @@ namespace CSS490Kinect
             vectoredMidPoint.Y = (depthHighY + depthLowY) / 2.0f;
 
             //Get average of distances of the currentpoints
+            Double currentAverages = 0.0;
+            Double validPoints = 0.0;
+            foreach (DepthSpacePoint dsp in currentDepthPoints)
+            {
+                if (dsp.X == 0.0f && dsp.Y == 0.0f)
+                {
+                    continue;
+                }
+                validPoints++;
+                // Length between points is SQRT((X2-X1)^2 + (Y2-Y1)^2)
+                Double xDifference = dsp.X - currentMidPoint.X; // Get X2-X1
+                Double yDifference = dsp.Y - currentMidPoint.Y; // Get Y2-Y1
+                xDifference = Math.Pow(xDifference, 2.0);   //Square the differences
+                yDifference = Math.Pow(yDifference, 2.0);   // Square the differencs
+                currentAverages += Math.Sqrt(xDifference + yDifference); // Square Root to get the distance between points
+            }
+            currentAverages = currentAverages / validPoints;
 
+            Double vectoredAverages = 0.0;
+            foreach (DepthSpacePoint dsp in vectoredDepthPoints)
+            {
+                Double xDifference = dsp.X - vectoredMidPoint.X; // Get X2-X1
+                Double yDifference = dsp.Y - vectoredMidPoint.Y; // Get Y2-Y1
+                xDifference = Math.Pow(xDifference, 2.0);   //Square the differences
+                yDifference = Math.Pow(yDifference, 2.0);   // Square the differencs
+                vectoredAverages += Math.Sqrt(xDifference + yDifference); // Square Root to get the distance between points
+            }
+            vectoredAverages = vectoredAverages / validPoints;
 
-            return true;
+            return vectoredAverages <= currentAverages; ;
         }
     }
 }
