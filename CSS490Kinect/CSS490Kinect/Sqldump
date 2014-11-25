@@ -11,40 +11,77 @@ namespace sql_connection
     {
         static void Main(string[] args)
         {
+            ExpandablePersonTimes theList = new ExpandablePersonTimes();
+            theList.addPersonTime(124536874, 1, 1);
+            theList.addPersonTime(124536874, 2, 1);
+            theList.addPersonTime(124536874, 3, 1);
+            theList.addPersonTime(124536874, 5, 3);
+            theList.addPersonTime(124536874, 6, 2);
+            theList.addPersonTime(124536874, 7, 1);
+
+            theList.addPersonTime(124584962, 1, 1);
+            theList.addPersonTime(124584962, 2, 1);
+            theList.addPersonTime(124584962, 3, 1);
+
+            theList.addPersonTime(124586821, 7, 1);
+            theList.addPersonTime(124586821, 8, 1);
+            theList.addPersonTime(124586821, 6, 1);
+
+            theList.addPersonTime(124536874, 8, 1);
+            theList.addPersonTime(124536874, 9, 1);
+            theList.addPersonTime(124536874, 10, 1);
+
+            theList.addPersonTime(124536511, 1, 1);
+            theList.addPersonTime(124536511, 3, 1);
+            theList.addPersonTime(124536511, 4, 2);
+            theList.addPersonTime(124536511, 5, 1);
+
         }
     }
 
 
     public class PersonTime
     {
-        List<TimeSpan> timestamps = new List<TimeSpan>();
+        List<timeEngaged> timestamps = new List<timeEngaged>();
         public ulong TrackingID { get; set; }
 
-        public PersonTime(ulong ID, TimeSpan time)
+        public PersonTime(ulong ID, int time, int status)
         {
             TrackingID = ID;
-            timestamps.Add(time);
+            timestamps.Add(time, status);
         }
 
-        public void addTime(TimeSpan time)
+        public void addTime(int time,int status)
         {
-            timestamps.Add(time);
+            timestamps.Add(time, status);
         }
 
-        public List<TimeSpan> returnTimeStamp()
+        public List<timeEngaged> returnTimeStamp()
         {
-            return timestamps; 
+            return time;
         }
 
+    }
+
+    public class timeEngaged
+    {
+        public int time;
+        public int engaged;
+
+        public timeEngaged(int timeIn, int engagedIn)
+        {
+            time = timeIn;
+            engaged = engagedIn;
+        }
     }
 
     public class ExpandablePersonTimes
     {
         List<PersonTime> people = new List<PersonTime>();
 
-        public void addPersonTime(ulong trackingID, TimeSpan time)
+        public void addPersonTime(ulong trackingID, int time, int engaged)
         {
-            PersonTime newPerson = new PersonTime(trackingID, time);
+            PersonTime newPerson = new PersonTime(trackingID, time, engaged);
 
             if (people.BinarySearch(newPerson) < 0) //not in list, add the new person
             {
@@ -52,7 +89,7 @@ namespace sql_connection
             }
             else  //otherwise, found, add the timestamp
             {
-                people[people.BinarySearch(newPerson)].addTime(time);
+                people[people.BinarySearch(newPerson)].addTime(time,engaged);
             }
 
         }
@@ -72,16 +109,31 @@ namespace sql_connection
         {
             SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder("this is where it goes");
 
-            SqlConnection con = new SqlConnection(connectionString);
-
-            con.Open();
-
+            SqlConnection con = new SqlConnection();
+            con.ConnectionString =
+            "Data Source=75.150.0.65;" +
+            "Initial Catalog=none;" +
+            "User id=sa;" +
+            "Password=SQLs3rv3r;";
+            try
+            {
+                con.Open();
+                Console.WriteLine("Success");
+                con.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed");
+            }
             int length = data.Count();
-            int depth;
+            int depth = 0;
 
             foreach (PersonTime P in data)
             {
-                P.returnTimeStamp().Count; 
+                if (P.returnTimeStamp().Count > depth)
+                {
+                    depth = P.returnTimeStamp().Count;
+                }
             }
 
 
