@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -22,7 +22,7 @@ namespace CSS490Kinect
         KinectSensor sensor = null;
         public event PropertyChangedEventHandler PropertyChanged;
         FrameReducer frameReducer = null;
-        List<People> currentPeople = null;
+        StreamWriter writer = new StreamWriter("C:\\sessiondata.csv");
         
 
         //Main
@@ -31,39 +31,45 @@ namespace CSS490Kinect
             // initialize the components (controls) of the window
             sensor = KinectSensor.GetDefault();
 
+            //Add the frame arrival event to the main UI for updating information
+            sensor.BodyFrameSource.FrameCaptured += BodyFrameSource_FrameCaptured;
+
             InitializeComponent();
 
             //Initialize the FrameReducer
             frameReducer = new FrameReducer();
             
+            
+        }
+
+        //Framecaptured Evenet
+        void BodyFrameSource_FrameCaptured(object sender, FrameCapturedEventArgs e)
+        {
+            //Count the total number of frames
+            framesCaptured++;
+            //Update the Text Information in the UI
+            BodiesTracked.Text = "Bodies Tracked: " + frameReducer.CurrentBodyCount;
+            FacesTracked.Text = "Faces Tracked: " + frameReducer.CurrentFaceCount;
+            FrameCount.Text = "" + framesCaptured;
+            PeopleInfo.Text =  updatePeopleInfo();
+
         }
 
         //Turn the list of people into string information
         //Each person will be line deliminted on the UI
-        private void updatePeopleInfo()
+        private string updatePeopleInfo()
         {
-            //Count the total number of frames
-            framesCaptured++;
-            List<People> currentPeople = frameReducer.GetPeople();
-
-            //Update the Text Information in the UI
-            BodiesTracked.Text = "Bodies Tracked: " + frameReducer.CurrentBodyCount;
-            FacesTracked.Text = "Faces Tracked: " + frameReducer.CurrentFaceCount;
-            string currentPeopleInfo = "";
             
+            int counter = 0;
+            string currentPeopleInfo = "";
+            List<People> currentPeople = frameReducer.GetPeople();
             foreach (People p in currentPeople)
             {
-                currentPeopleInfo += "Tracking ID: " + p.TrackingID + " Engaged: " + p.Engauged + " EyesOpen: " + p.EyesOpen + "\n" + "Vector: x:" + p.FaceOrientaion.X + " y:" + p.FaceOrientaion.Y + " z:" + p.FaceOrientaion.Z + " w:" + p.FaceOrientaion.W + "\n";
+                currentPeopleInfo += "Tracking ID: " + p.TrackingID + " Engaged: " + p.Engauged + " EyesOpen: " + p.EyesOpen + "\n";
+                writer.WriteLine("{0},{1},{2}", p.TrackingID, counter, p.Engauged);
             }
-            FrameCount.Text = "" + framesCaptured;
-            BodyFramesProcessed.Text = "BodyFramesProcessed: " + frameReducer.BodyFramesProcessed;
-            FaceFramesProcessed.Text = "FaceFramesProcessed: " + frameReducer.FaceFramesProcessed;
-            PeopleInfo.Text = currentPeopleInfo;
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            updatePeopleInfo();
+            counter++;
+            return currentPeopleInfo;
         }
 
     }
