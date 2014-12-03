@@ -10,6 +10,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using Microsoft.Kinect;
 using Microsoft.Kinect.Face;
+using System.Data.Linq;
+using System.Data.Linq.Mapping;
 
 namespace CSS490Kinect
 {
@@ -22,7 +24,7 @@ namespace CSS490Kinect
         KinectSensor sensor = null;
         public event PropertyChangedEventHandler PropertyChanged;
         FrameReducer frameReducer = null;
-        StreamWriter writer = new StreamWriter("C:\\sessiondata.csv");
+        StreamWriter writer = null;
         
 
         //Main
@@ -38,7 +40,9 @@ namespace CSS490Kinect
 
             //Initialize the FrameReducer
             frameReducer = new FrameReducer();
-            
+
+            //opens the backup data
+            StreamWriter writer = new StreamWriter("C:\\sessiondata.csv");
             
         }
 
@@ -72,5 +76,34 @@ namespace CSS490Kinect
             return currentPeopleInfo;
         }
 
+        private void dataDump()
+        {
+
+            StreamReader reader = new StreamReader("C:\\sessiondata.csv");
+            String parseLine = null;
+            while ((parseLine = reader.ReadLine()) != null)
+            {
+                String[] output = parseLine.Split(new char[] { ',' });
+                int SID = 0;
+                int timeStamp = 0;
+                int engaged = 0;
+                SID = Convert.ToInt32(output[0]);
+                timeStamp = Convert.ToInt32(output[1]);
+                engaged = Convert.ToInt32(output[2]);
+
+                DataClasses1DataContext db = new DataClasses1DataContext();
+
+                Table<Session> sessionTable = db.GetTable<Session>();
+                Table<TrackedUser> trackingTable = db.GetTable<TrackedUser>();
+                TrackedUser tUser = new TrackedUser();
+                tUser.userId = SID;
+
+                db.TrackedUsers.InsertOnSubmit(tUser);
+
+            }
+            
+        }
+
+        
     }
 }
